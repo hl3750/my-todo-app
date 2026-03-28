@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nebula">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- confetti container -->
+<div id="confetti-wrap"></div>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="hdr-left">
+    <button class="btn-icon" id="btn-sidebar" title="Toggle sidebar">☰</button>
+    <span class="app-logo">✦ Weekly Planner</span>
+  </div>
+
+  <div class="hdr-center">
+    <button class="btn-nav" id="btn-prev">&#8249;</button>
+    <span class="week-label" id="week-label"></span>
+    <button class="btn-nav" id="btn-next">&#8250;</button>
+  </div>
+
+  <div class="hdr-right">
+    <!-- Theme switcher -->
+    <div class="theme-dots" title="Choose theme">
+      <div class="theme-dot active" data-t="nebula"   title="Nebula"></div>
+      <div class="theme-dot"        data-t="forest"   title="Forest"></div>
+      <div class="theme-dot"        data-t="sunset"   title="Sunset"></div>
+      <div class="theme-dot"        data-t="midnight" title="Midnight"></div>
+      <div class="theme-dot"        data-t="rose"     title="Rose Gold"></div>
+    </div>
+    <button class="btn-outline" id="btn-today">Today</button>
+    <button class="btn-ghost"   id="btn-stats">📊 Stats</button>
+    <button class="btn-primary" id="btn-new-task">＋ New Task</button>
+    <button class="btn-icon"    id="btn-dark"  title="Toggle dark mode">🌙</button>
+    <button class="btn-icon"    id="btn-guide" title="使用手册">📖</button>
+  </div>
+</header>
+
+<!-- ── BODY ────────────────────────────────────────────────── -->
+<div class="app-body">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+
+      <!-- Mini Calendar -->
+      <section class="sb-sec">
+        <div id="mini-cal"></div>
+      </section>
+
+      <!-- Quick Capture -->
+      <section class="sb-sec">
+        <h4 class="sb-title">⚡ Quick Capture</h4>
+        <div class="quick-add-bar">
+          <span class="qa-icon">✏️</span>
+          <input class="quick-add-input" id="quick-add-input"
+            placeholder="dentist tomorrow 3pm 1h…" autocomplete="off">
+          <button class="qa-submit" id="qa-submit">Add</button>
+        </div>
+        <div id="inbox-list" class="inbox-list" style="margin-top:8px"></div>
+      </section>
+
+      <!-- Week Goals -->
+      <section class="sb-sec">
+        <h4 class="sb-title">🎯 Week Goals</h4>
+        <textarea class="sb-area" id="week-goals"
+          placeholder="What do you want to achieve this week?"></textarea>
+      </section>
+
+      <!-- Habit Tracker -->
+      <section class="sb-sec">
+        <h4 class="sb-title">🔥 Habits</h4>
+        <div id="habit-list" class="habit-list"></div>
+        <button class="add-habit-btn" id="add-habit-btn">＋ Add habit</button>
+      </section>
+
+      <!-- Weekly Progress -->
+      <section class="sb-sec">
+        <h4 class="sb-title">📈 Weekly Progress</h4>
+        <div id="week-stats"></div>
+      </section>
+
+      <!-- Weekly Summary -->
+      <section class="sb-sec">
+        <h4 class="sb-title">📝 Weekly Summary</h4>
+        <textarea class="sb-area" id="week-summary"
+          placeholder="End-of-week reflection…"></textarea>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- CALENDAR -->
+  <main class="cal-main" id="cal-main">
+    <div class="cal-header" id="cal-header"></div>
+    <div class="cal-body">
+      <div class="time-gutter" id="time-gutter"></div>
+      <div class="days-grid"   id="days-grid"></div>
+    </div>
+  </main>
+
+</div><!-- /app-body -->
+
+<!-- ══ POMODORO WIDGET ═════════════════════════════════════ -->
+<div class="pomo-widget" id="pomo-widget">
+  <button class="pomo-minimise" id="pomo-min" title="Minimise">−</button>
+  <div class="pomo-ring-wrap">
+    <svg viewBox="0 0 60 60">
+      <circle class="pomo-track" cx="30" cy="30" r="29"/>
+      <circle class="pomo-fill"  cx="30" cy="30" r="29" id="pomo-ring"/>
+    </svg>
+    <div class="pomo-time-center">
+      <span class="pomo-time" id="pomo-display">25:00</span>
+      <span class="pomo-mode" id="pomo-mode-lbl">FOCUS</span>
+    </div>
+  </div>
+  <div class="pomo-session-dots" id="pomo-dots"></div>
+  <div class="pomo-task-row" id="pomo-task-row">—</div>
+  <div class="pomo-controls">
+    <button class="pomo-btn" id="pomo-start" title="Start / Pause">▶</button>
+    <button class="pomo-btn" id="pomo-reset" title="Reset">↺</button>
+    <button class="pomo-btn" id="pomo-skip"  title="Skip">⏭</button>
+  </div>
+  <div class="pomo-label" id="pomo-label">Pomodoro Timer</div>
+</div>
+
+
+<!-- ══ MODAL: NEW / EDIT TASK ═════════════════════════════ -->
+<div class="overlay" id="overlay-task" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-hdr">
+      <h2 id="modal-task-title">New Task</h2>
+      <button class="btn-icon" id="close-task">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="fg">
+        <label for="inp-text">Task Description</label>
+        <textarea id="inp-text" rows="2" placeholder="What do you plan to do?"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="fg">
+          <label for="inp-date">Date</label>
+          <input type="date" id="inp-date">
+        </div>
+        <div class="fg">
+          <label for="inp-time">Start Time</label>
+          <select id="inp-time"></select>
+        </div>
+        <div class="fg">
+          <label for="inp-dur">Duration</label>
+          <select id="inp-dur">
+            <option value="30">30 min</option>
+            <option value="60" selected>1 hr</option>
+            <option value="90">1.5 hr</option>
+            <option value="120">2 hr</option>
+            <option value="180">3 hr</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Category</label>
+        <div class="cat-row" id="cat-picker">
+          <button class="cat-btn active" data-cat="work">💼 Work</button>
+          <button class="cat-btn" data-cat="personal">🏠 Personal</button>
+          <button class="cat-btn" data-cat="health">💪 Health</button>
+          <button class="cat-btn" data-cat="other">✨ Other</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Priority</label>
+        <button class="priority-btn" id="priority-btn" data-starred="false">☆ Normal</button>
+      </div>
+
+      <div class="fg">
+        <label>Notes</label>
+        <textarea id="inp-notes" rows="2" placeholder="Any details or links…"></textarea>
+      </div>
+
+      <div class="fg">
+        <label>Subtasks</label>
+        <div class="subtask-list" id="subtask-list"></div>
+        <button class="add-subtask-btn" id="add-subtask-btn">＋ Add subtask</button>
+      </div>
+
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" id="btn-cancel">Cancel</button>
+      <button class="btn-primary" id="btn-submit">Add Task</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL: ANALYTICS ═══════════════════════════════════ -->
+<div class="overlay" id="overlay-stats" hidden>
+  <div class="modal-card analytics-card" role="dialog" aria-modal="true">
+    <div class="modal-hdr">
+      <h2>📊 Weekly Analytics</h2>
+      <button class="btn-icon" id="close-stats">✕</button>
+    </div>
+    <div class="modal-body" id="analytics-body"></div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL: GUIDE ════════════════════════════════════════ -->
+<div class="overlay" id="overlay-guide" hidden>
+  <div class="modal-card guide-card" role="dialog" aria-modal="true">
+    <div class="modal-hdr">
+      <h2>使用手册</h2>
+      <button class="btn-icon" id="close-guide">✕</button>
+    </div>
+    <div class="modal-body guide-body">
+
+      <div class="gb">
+        <h3>📅 查看与切换周次</h3>
+        <p>使用顶部 <strong>‹</strong> 和 <strong>›</strong> 按钮切换上/下周。点击 <strong>Today</strong> 立即跳回本周，页面同时滚动到当前时间。</p>
+      </div>
+
+      <div class="gb">
+        <h3>➕ 添加新任务（两种方式）</h3>
+        <ul>
+          <li>点击右上角 <strong>＋ New Task</strong> 按钮，手动填写。</li>
+          <li><strong>点击日历中任意空白时间格</strong>，日期和时间自动填入弹窗。</li>
+        </ul>
+      </div>
+
+      <div class="gb">
+        <h3>⚡ 快速录入（Quick Capture）</h3>
+        <p>在左侧面板的快速录入框里输入自然语言，例如 <strong>"dentist tomorrow 3pm 1h"</strong>，系统会自动解析日期、时间和时长。任务先进入 Inbox，再拖入日历或点击 <strong>Schedule</strong> 安排时间。</p>
+      </div>
+
+      <div class="gb">
+        <h3>🎯 切换任务状态</h3>
+        <p><strong>单击任务卡片</strong>循环切换：
+          <span class="g-badge planned">Planned</span> →
+          <span class="g-badge inprogress">In Progress</span> →
+          <span class="g-badge done">Done</span>。
+          <strong>双击</strong>可编辑任务详情。完成一天所有任务时会触发 🎉 彩纸动画。
+        </p>
+      </div>
+
+      <div class="gb">
+        <h3>🖱️ 拖拽重新排期</h3>
+        <p>将任务卡片直接<strong>拖拽到其他时间格或其他日期列</strong>，时间自动吸附到最近 30 分钟整点。也可以从 Inbox 把任务拖入日历。</p>
+      </div>
+
+      <div class="gb">
+        <h3>✅ 子任务（Subtasks）</h3>
+        <p>创建/编辑任务时可添加子任务清单，任务卡片上会显示完成进度条（如 <strong>2/4</strong>）。</p>
+      </div>
+
+      <div class="gb">
+        <h3>🍅 Pomodoro 专注计时器</h3>
+        <p>右下角圆形计时器：25 分钟专注 + 5 分钟休息。点击 <strong>▶</strong> 开始，<strong>↺</strong> 重置，<strong>⏭</strong> 跳过当前阶段。点击 <strong>−</strong> 可最小化。完成后浏览器会发送通知（需授权）。</p>
+      </div>
+
+      <div class="gb">
+        <h3>🔥 习惯追踪（Habits）</h3>
+        <p>点击 <strong>＋ Add habit</strong> 添加每日习惯，面板显示本周 7 天的打卡格子。点格子即可标记完成，右侧显示连续打卡天数。</p>
+      </div>
+
+      <div class="gb">
+        <h3>📊 数据分析（Stats）</h3>
+        <p>点击顶部 <strong>📊 Stats</strong> 查看本周：分类时间分布甜甜圈图、每日完成率柱状图、及洞察卡片（效率最高时段、最佳天、连续完成记录等）。</p>
+      </div>
+
+      <div class="gb">
+        <h3>🎨 主题切换</h3>
+        <p>顶部五个彩色圆点：<strong>Nebula（默认）/ Forest / Sunset / Midnight / Rose Gold</strong>，加上 🌙 深色模式，共 10 种视觉风格。</p>
+      </div>
+
+      <div class="gb">
+        <h3>⌨️ 键盘快捷键</h3>
+        <table class="sc-table">
+          <tr><td><kbd>N</kbd></td><td>打开新建任务弹窗</td></tr>
+          <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>切换上周 / 下周</td></tr>
+          <tr><td><kbd>T</kbd></td><td>跳回本周</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>关闭弹窗</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="features.js"></script>
+</body>
+</html>
